@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SquawkScribe — SkyShare Maintenance Reporter</title>
+    <style>
+        /* ============================================================
+           SquawkScribe — Global Styles
+           ============================================================ */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --sky-blue: #0f4c81;
+            --sky-light: #e8f0fe;
+            --sky-accent: #1a73e8;
+            --sky-dark: #0b2e50;
+            --success: #1e7e34;
+            --danger: #c62828;
+            --gray-50: #f8f9fa;
+            --gray-100: #f1f3f5;
+            --gray-200: #dee2e6;
+            --gray-400: #adb5bd;
+            --gray-600: #6c757d;
+            --gray-800: #343a40;
+            --radius: 8px;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--gray-50);
+            color: var(--gray-800);
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        /* ============================================================
+           Layout
+           ============================================================ */
+        .container {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 24px 16px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        header h1 {
+            font-size: 28px;
+            color: var(--sky-blue);
+            font-weight: 700;
+        }
+
+        header p {
+            color: var(--gray-600);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        /* ============================================================
+           Cards
+           ============================================================ */
+        .card {
+            background: #fff;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            font-size: 16px;
+            color: var(--sky-blue);
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--sky-light);
+        }
+
+        /* ============================================================
+           Form Controls
+           ============================================================ */
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gray-600);
+            margin-bottom: 4px;
+            margin-top: 12px;
+        }
+
+        label:first-of-type { margin-top: 0; }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 15px;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius);
+            background: var(--gray-50);
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--sky-accent);
+            background: #fff;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: var(--gray-400);
+            margin-top: 2px;
+        }
+
+        /* ============================================================
+           Buttons
+           ============================================================ */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            width: 100%;
+        }
+
+        .btn:active { transform: scale(0.98); }
+
+        .btn-primary {
+            background: var(--sky-accent);
+            color: #fff;
+        }
+
+        .btn-primary:hover { background: var(--sky-blue); }
+
+        .btn-primary:disabled {
+            background: var(--gray-200);
+            color: var(--gray-400);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: var(--gray-100);
+            color: var(--gray-800);
+            border: 1px solid var(--gray-200);
+        }
+
+        .btn-secondary:hover { background: var(--gray-200); }
+
+        .btn-success {
+            background: var(--success);
+            color: #fff;
+        }
+
+        .btn-success:hover { background: #166b2a; }
+
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .btn-row .btn { flex: 1; }
+
+        /* ============================================================
+           Status / Messages
+           ============================================================ */
+        .status {
+            padding: 10px 14px;
+            border-radius: var(--radius);
+            font-size: 14px;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .status.show { display: block; }
+
+        .status.info {
+            background: var(--sky-light);
+            color: var(--sky-blue);
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: var(--success);
+        }
+
+        .status.error {
+            background: #fce4e4;
+            color: var(--danger);
+        }
+
+        /* ============================================================
+           Link Output
+           ============================================================ */
+        #link-output {
+            display: none;
+            margin-top: 20px;
+        }
+
+        #link-output.show { display: block; }
+
+        .link-box {
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius);
+            padding: 12px;
+            font-size: 13px;
+            word-break: break-all;
+            color: var(--gray-600);
+            margin-bottom: 12px;
+            max-height: 80px;
+            overflow-y: auto;
+        }
+
+        /* ============================================================
+           Interview View
+           ============================================================ */
+        #interview-view {
+            display: none;
+        }
+
+        .chat-area {
+            min-height: 300px;
+            max-height: 60vh;
+            overflow-y: auto;
+            padding: 16px 0;
+        }
+
+        .message {
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            font-size: 15px;
+            line-height: 1.5;
+            max-width: 85%;
+        }
+
+        .message.assistant {
+            background: var(--sky-light);
+            color: var(--sky-dark);
+            border-bottom-left-radius: 2px;
+            margin-right: auto;
+        }
+
+        .message.user {
+            background: var(--sky-accent);
+            color: #fff;
+            border-bottom-right-radius: 2px;
+            margin-left: auto;
+        }
+
+        .message.system {
+            background: var(--gray-100);
+            color: var(--gray-600);
+            font-size: 13px;
+            text-align: center;
+            max-width: 100%;
+            font-style: italic;
+        }
+
+        /* Input area at bottom of interview */
+        .input-area {
+            display: flex;
+            gap: 10px;
+            padding: 12px 0;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .input-area input {
+            flex: 1;
+        }
+
+        .input-area .btn {
+            width: auto;
+            padding: 10px 20px;
+        }
+
+        /* ============================================================
+           Loading spinner
+           ============================================================ */
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--gray-200);
+            border-top-color: var(--sky-accent);
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ============================================================
+           Responsive
+           ============================================================ */
+        @media (max-width: 480px) {
+            .container { padding: 16px 12px; }
+            header h1 { font-size: 24px; }
+            .btn-row { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ================================================================
+     ADMIN VIEW — Jonathan generates interview links here
+     ================================================================ -->
+<div id="admin-view" class="container">
+    <header>
+        <h1>SquawkScribe</h1>
+        <p>SkyShare Maintenance Reporter</p>
+    </header>
+
+    <!-- API Credentials -->
+    <div class="card" id="credentials-card">
+        <h2>API Credentials</h2>
+        <label for="claude-key">Claude API Key</label>
+        <input type="password" id="claude-key" placeholder="sk-ant-..." />
+        <p class="hint">Stored locally on this device only</p>
+
+        <label for="airtable-token">Airtable Personal Access Token</label>
+        <input type="password" id="airtable-token" placeholder="pat..." />
+        <p class="hint">Stored locally on this device only</p>
+
+        <button class="btn btn-secondary" style="margin-top:16px" onclick="saveCredentials()">
+            Save Credentials
+        </button>
+        <div id="cred-status" class="status"></div>
+    </div>
+
+    <!-- Generate Interview Link -->
+    <div class="card">
+        <h2>Generate Interview Link</h2>
+
+        <label for="discrepancy-id">Discrepancy ID</label>
+        <input type="text" id="discrepancy-id" placeholder="e.g. N499CB-DIS-0126" />
+
+        <label for="mechanic-name">Mechanic First Name</label>
+        <input type="text" id="mechanic-name" placeholder="e.g. Mike" />
+
+        <button class="btn btn-primary" style="margin-top:20px" onclick="generateLink()" id="generate-btn">
+            Generate Interview Link
+        </button>
+
+        <div id="link-output">
+            <p style="font-weight:600; margin-bottom:8px; font-size:14px; color:var(--gray-600);">
+                Interview link ready:
+            </p>
+            <div class="link-box" id="link-text"></div>
+            <div class="btn-row">
+                <button class="btn btn-primary" onclick="copyLink()">Copy Link</button>
+                <button class="btn btn-secondary" onclick="emailLink()">Email Link</button>
+            </div>
+            <div id="link-status" class="status"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ================================================================
+     INTERVIEW VIEW — Mechanic sees this when opening the link
+     ================================================================ -->
+<div id="interview-view" class="container">
+    <header>
+        <h1>SquawkScribe</h1>
+        <p id="interview-subtitle">Maintenance Interview</p>
+    </header>
+
+    <div class="card">
+        <div class="chat-area" id="chat-area"></div>
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="Type your answer..."
+                   onkeydown="if(event.key==='Enter')sendMessage()" />
+            <button class="btn btn-primary" onclick="sendMessage()" id="send-btn">Send</button>
+        </div>
+    </div>
+
+    <div id="interview-status" class="status"></div>
+</div>
+
+<script>
+    /* ============================================================
+       SquawkScribe — Application Logic
+       ============================================================ */
+
+    // Airtable configuration
+    const AIRTABLE_BASE_ID = 'appO1cPyuPhy0KKAE';
+    const AIRTABLE_TABLE_ID = 'tblwYqRUAyX5RNQEG';
+
+    // Airtable field IDs for write-back
+    const FIELDS = {
+        firstInspection:    'fldRkl8jlgbV0AFWt',
+        componentsRuledOut: 'fldGoJlRxOSVxHO9p',
+        diagnosticTell:     'fldL29fI7hCmqgN6r',
+        rootCause:          'fldEuOU22WFXCJSK2',
+        failedComponent:    'fldIGhyIS6C1JSvuv',
+        failedPartNumber:   'fldXQ1gCEA7JDcNou',
+        repairAttempts:     'fld1c65wan4QMVHnA',
+        fasterPath:         'fldATqTppwWjqH1dp',
+        patternNote:        'fldxfssXxQqdG3Cmu',
+        interviewComplete:  'fldMzKCjmdK05OU3p',
+        interviewDate:      'flddPpME979k6s8OP'
+    };
+
+    // Session state
+    let session = {
+        claudeKey: '',
+        airtableToken: '',
+        discrepancyId: '',
+        mechanicName: '',
+        discrepancyRecord: null,
+        recordId: '',
+        messages: [],        // Claude conversation history
+        interviewDone: false
+    };
+
+    /* ============================================================
+       Initialization — decide which view to show
+       ============================================================ */
+    (function init() {
+        const params = new URLSearchParams(window.location.search);
+        const encoded = params.get('s');
+
+        if (encoded) {
+            // Mechanic is opening an interview link
+            try {
+                const data = JSON.parse(atob(encoded));
+                session.claudeKey = data.k;
+                session.airtableToken = data.t;
+                session.discrepancyId = data.d;
+                session.mechanicName = data.n;
+
+                document.getElementById('admin-view').style.display = 'none';
+                document.getElementById('interview-view').style.display = 'block';
+                document.getElementById('interview-subtitle').textContent =
+                    `Interview for ${session.discrepancyId}`;
+
+                startInterview();
+            } catch (e) {
+                alert('Invalid interview link. Please ask your supervisor for a new link.');
+                console.error('Failed to decode session:', e);
+            }
+        } else {
+            // Admin view — load saved credentials
+            const savedKey = localStorage.getItem('squawkscribe_claude_key');
+            const savedToken = localStorage.getItem('squawkscribe_airtable_token');
+            if (savedKey) document.getElementById('claude-key').value = savedKey;
+            if (savedToken) document.getElementById('airtable-token').value = savedToken;
+        }
+    })();
+
+    /* ============================================================
+       Admin — Save Credentials
+       ============================================================ */
+    function saveCredentials() {
+        const key = document.getElementById('claude-key').value.trim();
+        const token = document.getElementById('airtable-token').value.trim();
+
+        if (!key || !token) {
+            showStatus('cred-status', 'Please enter both credentials.', 'error');
+            return;
+        }
+
+        localStorage.setItem('squawkscribe_claude_key', key);
+        localStorage.setItem('squawkscribe_airtable_token', token);
+        showStatus('cred-status', 'Credentials saved to this device.', 'success');
+    }
+
+    /* ============================================================
+       Admin — Generate Interview Link
+       ============================================================ */
+    function generateLink() {
+        const key = document.getElementById('claude-key').value.trim()
+                    || localStorage.getItem('squawkscribe_claude_key');
+        const token = document.getElementById('airtable-token').value.trim()
+                      || localStorage.getItem('squawkscribe_airtable_token');
+        const discId = document.getElementById('discrepancy-id').value.trim();
+        const name = document.getElementById('mechanic-name').value.trim();
+
+        if (!key || !token) {
+            showStatus('link-status', 'Save your API credentials first.', 'error');
+            document.getElementById('link-output').classList.add('show');
+            return;
+        }
+        if (!discId || !name) {
+            showStatus('link-status', 'Enter a discrepancy ID and mechanic name.', 'error');
+            document.getElementById('link-output').classList.add('show');
+            return;
+        }
+
+        const payload = { k: key, t: token, d: discId, n: name };
+        const encoded = btoa(JSON.stringify(payload));
+
+        // Use current page URL as the base
+        const baseUrl = window.location.origin + window.location.pathname;
+        const link = `${baseUrl}?s=${encoded}`;
+
+        document.getElementById('link-text').textContent = link;
+        document.getElementById('link-output').classList.add('show');
+        showStatus('link-status', 'Link generated successfully.', 'success');
+
+        // Store the link for copy/email
+        session.generatedLink = link;
+    }
+
+    function copyLink() {
+        navigator.clipboard.writeText(session.generatedLink).then(() => {
+            showStatus('link-status', 'Link copied to clipboard.', 'success');
+        }).catch(() => {
+            // Fallback: select the text
+            const el = document.getElementById('link-text');
+            const range = document.createRange();
+            range.selectNodeContents(el);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+            showStatus('link-status', 'Select and copy the link above.', 'info');
+        });
+    }
+
+    function emailLink() {
+        const subject = encodeURIComponent(`SquawkScribe Interview — ${document.getElementById('discrepancy-id').value.trim()}`);
+        const body = encodeURIComponent(
+            `Hi ${document.getElementById('mechanic-name').value.trim()},\n\n` +
+            `Please complete your maintenance interview for discrepancy ${document.getElementById('discrepancy-id').value.trim()} using the link below:\n\n` +
+            `${session.generatedLink}\n\n` +
+            `Open the link in Chrome on any device. The interview takes about 5-10 minutes.\n\n` +
+            `Thanks,\nJonathan`
+        );
+        window.open(`mailto:?subject=${subject}&body=${body}`);
+    }
+
+    /* ============================================================
+       Interview — Start
+       ============================================================ */
+    async function startInterview() {
+        addMessage('system', 'Loading discrepancy details...');
+
+        try {
+            // Fetch the discrepancy record from Airtable
+            const record = await fetchDiscrepancy(session.discrepancyId);
+            if (!record) {
+                addMessage('system', `Could not find discrepancy "${session.discrepancyId}" in Airtable. Please check the ID and try again.`);
+                return;
+            }
+            session.discrepancyRecord = record.fields;
+            session.recordId = record.id;
+
+            addMessage('system', `Loaded: ${session.discrepancyId}`);
+
+            // Build the system prompt with discrepancy context
+            const systemPrompt = buildSystemPrompt(session.discrepancyRecord, session.mechanicName);
+
+            // Start the conversation with Claude
+            session.messages = [];
+            const greeting = await callClaude(systemPrompt, session.messages);
+            addMessage('assistant', greeting);
+
+        } catch (err) {
+            addMessage('system', `Error starting interview: ${err.message}`);
+            console.error(err);
+        }
+    }
+
+    /* ============================================================
+       Interview — Send Message
+       ============================================================ */
+    async function sendMessage() {
+        const input = document.getElementById('user-input');
+        const text = input.value.trim();
+        if (!text || session.interviewDone) return;
+
+        input.value = '';
+        addMessage('user', text);
+
+        // Add user message to history
+        session.messages.push({ role: 'user', content: text });
+
+        // Disable input while waiting
+        input.disabled = true;
+        document.getElementById('send-btn').disabled = true;
+        addMessage('system', '<span class="spinner"></span> Thinking...');
+
+        try {
+            const systemPrompt = buildSystemPrompt(session.discrepancyRecord, session.mechanicName);
+            const response = await callClaude(systemPrompt, session.messages);
+
+            // Remove "Thinking..." message
+            removeLastSystemMessage();
+
+            // Check if interview is complete
+            if (response.includes('INTERVIEW_COMPLETE')) {
+                const cleanResponse = response.replace('INTERVIEW_COMPLETE', '').trim();
+                addMessage('assistant', cleanResponse);
+                session.messages.push({ role: 'assistant', content: cleanResponse });
+                await finalizeInterview();
+            } else {
+                addMessage('assistant', response);
+                session.messages.push({ role: 'assistant', content: response });
+            }
+
+        } catch (err) {
+            removeLastSystemMessage();
+            addMessage('system', `Error: ${err.message}. Try sending again.`);
+            console.error(err);
+        }
+
+        input.disabled = false;
+        document.getElementById('send-btn').disabled = false;
+        input.focus();
+    }
+
+    /* ============================================================
+       Interview — Finalize & Write to Airtable
+       ============================================================ */
+    async function finalizeInterview() {
+        session.interviewDone = true;
+        addMessage('system', 'Extracting interview data...');
+
+        try {
+            // Build the full conversation transcript
+            const transcript = session.messages
+                .map(m => `${m.role === 'user' ? 'MECHANIC' : 'INTERVIEWER'}: ${m.content}`)
+                .join('\n\n');
+
+            // Ask Claude to extract structured data
+            const extractionPrompt = `You are a data extraction assistant. Given the following maintenance interview transcript, extract the relevant information into a JSON object with exactly these keys:
+
+- firstInspection: What the mechanic first noticed or inspected
+- componentsRuledOut: Components or systems that were checked but not the cause
+- diagnosticTell: The key observation or clue that pointed to the real issue
+- rootCause: The determined root cause of the discrepancy
+- failedComponent: The specific component that failed
+- failedPartNumber: Part number of the failed component (if mentioned)
+- repairAttempts: What repair steps were taken
+- fasterPath: What the mechanic would do differently next time
+- patternNote: Any patterns noticed or connections to other discrepancies
+
+For any field where the information was not discussed or is unknown, use an empty string "".
+
+Respond with ONLY the JSON object, no other text.
+
+TRANSCRIPT:
+${transcript}`;
+
+            const extractionMessages = [{ role: 'user', content: extractionPrompt }];
+            const jsonStr = await callClaude('You extract structured data from transcripts. Respond only with valid JSON.', extractionMessages);
+
+            // Parse the extracted data
+            const extracted = JSON.parse(jsonStr);
+
+            // Build the Airtable PATCH payload using field IDs
+            const fields = {};
+            fields[FIELDS.firstInspection] = extracted.firstInspection || '';
+            fields[FIELDS.componentsRuledOut] = extracted.componentsRuledOut || '';
+            fields[FIELDS.diagnosticTell] = extracted.diagnosticTell || '';
+            fields[FIELDS.rootCause] = extracted.rootCause || '';
+            fields[FIELDS.failedComponent] = extracted.failedComponent || '';
+            fields[FIELDS.failedPartNumber] = extracted.failedPartNumber || '';
+            fields[FIELDS.repairAttempts] = extracted.repairAttempts || '';
+            fields[FIELDS.fasterPath] = extracted.fasterPath || '';
+            fields[FIELDS.patternNote] = extracted.patternNote || '';
+            fields[FIELDS.interviewComplete] = true;
+            fields[FIELDS.interviewDate] = new Date().toISOString().split('T')[0];
+
+            // PATCH to Airtable
+            await patchAirtable(session.recordId, fields);
+
+            removeLastSystemMessage();
+            addMessage('system', 'Interview complete. Your responses have been saved. Thank you!');
+            showStatus('interview-status', 'Interview data saved to Airtable successfully.', 'success');
+
+        } catch (err) {
+            removeLastSystemMessage();
+            addMessage('system', `Error saving data: ${err.message}. Your answers were recorded in the conversation above.`);
+            console.error('Finalization error:', err);
+        }
+    }
+
+    /* ============================================================
+       Claude API
+       ============================================================ */
+    async function callClaude(systemPrompt, messages) {
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': session.claudeKey,
+                'anthropic-version': '2023-06-01',
+                'anthropic-dangerous-direct-browser-access': 'true'
+            },
+            body: JSON.stringify({
+                model: 'claude-haiku-4-5-20251001',
+                max_tokens: 1024,
+                system: systemPrompt,
+                messages: messages.length > 0 ? messages : [{ role: 'user', content: 'Begin the interview.' }]
+            })
+        });
+
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error?.message || `Claude API error: ${res.status}`);
+        }
+
+        const data = await res.json();
+        return data.content[0].text;
+    }
+
+    /* ============================================================
+       Airtable API
+       ============================================================ */
+    async function fetchDiscrepancy(discrepancyId) {
+        // Search for the record by discrepancy ID
+        const formula = encodeURIComponent(`{Discrepancy ID} = "${discrepancyId}"`);
+        const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_ID}?filterByFormula=${formula}&maxRecords=1`;
+
+        const res = await fetch(url, {
+            headers: { 'Authorization': `Bearer ${session.airtableToken}` }
+        });
+
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error?.message || `Airtable error: ${res.status}`);
+        }
+
+        const data = await res.json();
+        return data.records[0] || null;
+    }
+
+    async function patchAirtable(recordId, fields) {
+        const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_ID}/${recordId}`;
+
+        const res = await fetch(url, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': `Bearer ${session.airtableToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ fields })
+        });
+
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error?.message || `Airtable PATCH error: ${res.status}`);
+        }
+
+        return await res.json();
+    }
+
+    /* ============================================================
+       System Prompt Builder
+       ============================================================ */
+    function buildSystemPrompt(record, mechanicName) {
+        // Pull key details from the discrepancy record
+        const details = [];
+        for (const [key, value] of Object.entries(record)) {
+            if (value && typeof value === 'string' && value.length < 500) {
+                details.push(`${key}: ${value}`);
+            }
+        }
+
+        return `You are SquawkScribe, a maintenance interview assistant for SkyShare Aviation. You are conducting a structured post-repair interview with ${mechanicName}, a maintenance technician.
+
+DISCREPANCY DETAILS:
+${details.join('\n')}
+
+YOUR ROLE:
+- Greet ${mechanicName} by name and briefly describe the discrepancy you're asking about
+- Ask one question at a time, conversationally
+- Cover these topics (adapt based on their answers):
+  1. What they first noticed when they inspected the aircraft
+  2. Any components or systems they ruled out
+  3. The key observation that pointed them toward the real issue
+  4. The root cause they identified
+  5. The specific component that failed (and part number if they know it)
+  6. What repair steps they took
+  7. What they'd do differently or faster next time
+- Keep questions natural and follow up on interesting details
+- If they mention something unexpected, explore it
+- When all topics are covered, thank them and end your final message with the exact text INTERVIEW_COMPLETE
+
+IMPORTANT:
+- Be conversational and respectful — these are experienced technicians
+- Keep your responses concise (2-3 sentences max per message)
+- Don't ask multiple questions at once
+- Use plain language, not corporate jargon`;
+    }
+
+    /* ============================================================
+       UI Helpers
+       ============================================================ */
+    function addMessage(role, content) {
+        const area = document.getElementById('chat-area');
+        const div = document.createElement('div');
+        div.className = `message ${role}`;
+        div.innerHTML = content;
+        area.appendChild(div);
+        area.scrollTop = area.scrollHeight;
+    }
+
+    function removeLastSystemMessage() {
+        const area = document.getElementById('chat-area');
+        const msgs = area.querySelectorAll('.message.system');
+        if (msgs.length > 0) {
+            msgs[msgs.length - 1].remove();
+        }
+    }
+
+    function showStatus(elementId, message, type) {
+        const el = document.getElementById(elementId);
+        el.textContent = message;
+        el.className = `status show ${type}`;
+    }
+</script>
+
+</body>
+</html>
